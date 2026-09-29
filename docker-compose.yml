@@ -33,20 +33,20 @@ services:
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-["http://localhost:3000"]}
       SECRET_KEY: ${SECRET_KEY:-change-me-in-production-strong-secret}
     ports:
-      - "8000:8000"
+      - "${BACKEND_PORT:-8001}:8000"
 
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-}
     container_name: ndtt_frontend
     restart: unless-stopped
     depends_on:
       - backend
     environment:
-      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-}
     ports:
       - "3000:3000"
 
