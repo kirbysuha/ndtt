@@ -14,10 +14,13 @@ import type {
   PublicNoteItem,
 } from "@/types";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+// Relative `/api` by default so browser requests go to the current host (ndtt.suhay.xyz/api/...)
+// without baking any hardcoded localhost or domain into client-side JS bundles.
+const rawBase = (process.env.NEXT_PUBLIC_API_URL || "").trim().replace(/\/+$/, "");
+const API_BASE = rawBase ? `${rawBase}/api` : "/api";
 
 export const api = axios.create({
-  baseURL: `${API_BASE}/api`,
+  baseURL: API_BASE,
   headers: { "Content-Type": "application/json" },
 });
 
