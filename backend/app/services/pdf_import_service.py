@@ -155,6 +155,7 @@ def parse_schedule_pdf(file_content: bytes) -> list[dict]:
 
         order_label = f"uyg-{order_num}" if is_uyg else f"s{order_num}"
         yari_info = " (1.Y ve 2.Y)" if (has_1y and has_2y) else (" (1.Y)" if has_1y else (" (2.Y)" if has_2y else ""))
+        topic = re.sub(r"\b[12]\s*\.\s*[yY]\b", "", topic)
         topic = clean_spaces(topic)
 
         parsed_list.append({
