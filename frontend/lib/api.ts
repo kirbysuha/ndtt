@@ -24,6 +24,46 @@ export const api = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
+// Oturum token'ını her istek başlığına ekle
+api.interceptors.request.use((config) => {
+  if (typeof window !== "undefined") {
+    const token = localStorage.getItem("ndtt_admin_token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+  }
+  return config;
+});
+
+// 401 hatası gelirse korumalı sayfalardan login'e yönlendir
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (typeof window !== "undefined" && error.response?.status === 401) {
+      const pathname = window.location.pathname;
+      const isPublic = pathname.startsWith("/apply") || pathname === "/login";
+      if (!isPublic) {
+        localStorage.removeItem("ndtt_admin_token");
+        window.location.href = `/login?from=${encodeURIComponent(pathname)}`;
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
+// ─── Auth ────────────────────────────────────────────────────────────────────
+export const authApi = {
+  login: (password: string, username = "admin") =>
+    api
+      .post<{ access_token: string; token_type: string; expires_in: number }>("/auth/login", {
+        username,
+        password,
+      })
+      .then((r) => r.data),
+  getMe: () =>
+    api.get<{ username: string; role: string }>("/auth/me").then((r) => r.data),
+};
+
 // ─── Classes ─────────────────────────────────────────────────────────────────
 export const classesApi = {
   list: () => api.get<Class[]>("/classes").then((r) => r.data),

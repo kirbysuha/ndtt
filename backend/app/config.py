@@ -15,10 +15,12 @@ class Settings(BaseSettings):
     # CORS
     ALLOWED_ORIGINS: list[str] = ["http://localhost:3000", "http://127.0.0.1:3000"]
 
-    # JWT (gelecekte auth için)
-    SECRET_KEY: str = "change-me-in-production-please-use-a-strong-secret"
+    # JWT & Auth
+    SECRET_KEY: str = "ndtt-super-secret-key-2026-secure-jwt-production"
     ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24  # 24 saat
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 gün
+    ADMIN_USERNAME: str = "admin"
+    ADMIN_PASSWORD: str = "admin123"
 
     class Config:
         env_file = ".env"

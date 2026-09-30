@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 
 from app.database import get_db
+from app.routers.auth import get_current_admin
 from app.models.class_model import Class
 from app.models.module import Module
 from app.schemas import ClassCreate, ClassUpdate, ClassResponse
@@ -32,7 +33,11 @@ async def list_classes(db: AsyncSession = Depends(get_db)):
 
 
 @router.post("", response_model=ClassResponse, status_code=status.HTTP_201_CREATED)
-async def create_class(data: ClassCreate, db: AsyncSession = Depends(get_db)):
+async def create_class(
+    data: ClassCreate,
+    db: AsyncSession = Depends(get_db),
+    admin: dict = Depends(get_current_admin),
+):
     new_class = Class(name=data.name, description=data.description)
     db.add(new_class)
     await db.flush()
@@ -61,7 +66,12 @@ async def get_class(class_id: str, db: AsyncSession = Depends(get_db)):
 
 
 @router.put("/{class_id}", response_model=ClassResponse)
-async def update_class(class_id: str, data: ClassUpdate, db: AsyncSession = Depends(get_db)):
+async def update_class(
+    class_id: str,
+    data: ClassUpdate,
+    db: AsyncSession = Depends(get_db),
+    admin: dict = Depends(get_current_admin),
+):
     result = await db.execute(select(Class).where(Class.id == class_id))
     c = result.scalar_one_or_none()
     if not c:
@@ -79,7 +89,11 @@ async def update_class(class_id: str, data: ClassUpdate, db: AsyncSession = Depe
 
 
 @router.delete("/{class_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_class(class_id: str, db: AsyncSession = Depends(get_db)):
+async def delete_class(
+    class_id: str,
+    db: AsyncSession = Depends(get_db),
+    admin: dict = Depends(get_current_admin),
+):
     result = await db.execute(select(Class).where(Class.id == class_id))
     c = result.scalar_one_or_none()
     if not c:

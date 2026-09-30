@@ -13,6 +13,7 @@ from app.routers import (
     import_router,
     teams_router,
     applications_router,
+    auth_router,
 )
 
 settings = get_settings()
@@ -51,6 +52,7 @@ app.include_router(dashboard_router, prefix=API_PREFIX)
 app.include_router(import_router, prefix=API_PREFIX)
 app.include_router(teams_router, prefix=API_PREFIX)
 app.include_router(applications_router, prefix=API_PREFIX)
+app.include_router(auth_router, prefix=API_PREFIX)
 
 
 @app.get("/")

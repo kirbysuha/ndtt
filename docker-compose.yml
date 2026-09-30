@@ -32,6 +32,8 @@ services:
       DEBUG: "false"
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-["http://localhost:3000"]}
       SECRET_KEY: ${SECRET_KEY:-change-me-in-production-strong-secret}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
     ports:
       - "${BACKEND_PORT:-8001}:8000"
 

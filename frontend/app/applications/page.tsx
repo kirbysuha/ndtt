@@ -69,6 +69,11 @@ export default function ApplicationsAdminPage() {
               }`}
             >
               {st === "ALL" ? `Tümü (${apps.length})` : st}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {isLoading ? (
         <div className="p-12 text-center text-slate-400">Başvurular yükleniyor...</div>
       ) : filtered.length === 0 ? (
@@ -155,11 +160,6 @@ export default function ApplicationsAdminPage() {
           </div>
         </div>
       )}
-
-            </button>
-          ))}
-        </div>
-      </div>
     </div>
   );
 }

@@ -4,6 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from app.database import get_db
+from app.routers.auth import get_current_admin
 from app.models.module import Module
 from app.models.lesson import Lesson
 from app.models.note_application import NoteApplication, ApplicationStatus
@@ -95,7 +96,11 @@ async def create_student_application(data: ApplicationCreate, db: AsyncSession =
 
 # ─── Admin Endpoint'leri ──────────────────────────────────────────────────────
 @router.get("/applications", response_model=list[ApplicationResponse])
-async def list_applications(module_id: str | None = None, db: AsyncSession = Depends(get_db)):
+async def list_applications(
+    module_id: str | None = None,
+    db: AsyncSession = Depends(get_db),
+    admin: dict = Depends(get_current_admin),
+):
     """Tüm not başvurularını listele."""
     query = (
         select(NoteApplication)
@@ -133,7 +138,10 @@ async def list_applications(module_id: str | None = None, db: AsyncSession = Dep
 
 @router.put("/applications/{app_id}/status", response_model=ApplicationResponse)
 async def update_application_status(
-    app_id: str, data: ApplicationStatusUpdate, db: AsyncSession = Depends(get_db)
+    app_id: str,
+    data: ApplicationStatusUpdate,
+    db: AsyncSession = Depends(get_db),
+    admin: dict = Depends(get_current_admin),
 ):
     """Başvurunun onay/ret durumunu güncelle."""
     result = await db.execute(
@@ -168,7 +176,11 @@ async def update_application_status(
 
 
 @router.delete("/applications/{app_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_application(app_id: str, db: AsyncSession = Depends(get_db)):
+async def delete_application(
+    app_id: str,
+    db: AsyncSession = Depends(get_db),
+    admin: dict = Depends(get_current_admin),
+):
     app = await db.scalar(select(NoteApplication).where(NoteApplication.id == app_id))
     if not app:
         raise HTTPException(status_code=404, detail="Başvuru bulunamadı")

@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from app.database import get_db
+from app.routers.auth import get_current_admin
 from app.models.module import Module
 from app.services.import_service import import_excel_to_module
 from app.services.pdf_import_service import parse_schedule_pdf, import_pdf_to_module
@@ -16,6 +17,7 @@ async def import_excel(
     file: UploadFile = File(...),
     overwrite: bool = Form(default=False),
     db: AsyncSession = Depends(get_db),
+    admin: dict = Depends(get_current_admin),
 ):
     """
     Excel dosyasını belirtilen modüle import et.
@@ -51,6 +53,7 @@ async def import_excel(
 @router.post("/pdf/preview")
 async def preview_pdf_schedule(
     file: UploadFile = File(...),
+    admin: dict = Depends(get_current_admin),
 ):
     """
     Haftalık ders programı PDF'sini ayrıştırıp önizleme döndürür (veritabanına yazmaz).
@@ -82,6 +85,7 @@ async def import_pdf_schedule(
     file: UploadFile = File(...),
     overwrite: bool = Form(default=False),
     db: AsyncSession = Depends(get_db),
+    admin: dict = Depends(get_current_admin),
 ):
     """
     Haftalık ders programı PDF'sini belirtilen modüle içe aktarır.

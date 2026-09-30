@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 
 from app.database import get_db
+from app.routers.auth import get_current_admin
 from app.models.class_model import Class
 from app.models.module import Module
 from app.models.lesson import Lesson
@@ -36,7 +37,12 @@ async def list_modules(class_id: str, db: AsyncSession = Depends(get_db)):
 
 
 @router.post("/classes/{class_id}/modules", response_model=ModuleResponse, status_code=status.HTTP_201_CREATED)
-async def create_module(class_id: str, data: ModuleCreate, db: AsyncSession = Depends(get_db)):
+async def create_module(
+    class_id: str,
+    data: ModuleCreate,
+    db: AsyncSession = Depends(get_db),
+    admin: dict = Depends(get_current_admin),
+):
     cls = await db.scalar(select(Class).where(Class.id == class_id))
     if not cls:
         raise HTTPException(status_code=404, detail="Sınıf bulunamadı")
@@ -73,7 +79,12 @@ async def get_module(module_id: str, db: AsyncSession = Depends(get_db)):
 
 
 @router.put("/modules/{module_id}", response_model=ModuleResponse)
-async def update_module(module_id: str, data: ModuleUpdate, db: AsyncSession = Depends(get_db)):
+async def update_module(
+    module_id: str,
+    data: ModuleUpdate,
+    db: AsyncSession = Depends(get_db),
+    admin: dict = Depends(get_current_admin),
+):
     result = await db.execute(select(Module).where(Module.id == module_id))
     m = result.scalar_one_or_none()
     if not m:
@@ -94,7 +105,11 @@ async def update_module(module_id: str, data: ModuleUpdate, db: AsyncSession = D
 
 
 @router.delete("/modules/{module_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_module(module_id: str, db: AsyncSession = Depends(get_db)):
+async def delete_module(
+    module_id: str,
+    db: AsyncSession = Depends(get_db),
+    admin: dict = Depends(get_current_admin),
+):
     result = await db.execute(select(Module).where(Module.id == module_id))
     m = result.scalar_one_or_none()
     if not m:

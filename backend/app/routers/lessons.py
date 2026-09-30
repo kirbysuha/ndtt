@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from app.database import get_db
+from app.routers.auth import get_current_admin
 from app.models.module import Module
 from app.models.lesson import Lesson
 from app.models.note_tracking import NoteTracking, NoteStatus
@@ -27,7 +28,12 @@ async def list_lessons(module_id: str, db: AsyncSession = Depends(get_db)):
 
 
 @router.post("/modules/{module_id}/lessons", response_model=LessonResponse, status_code=status.HTTP_201_CREATED)
-async def create_lesson(module_id: str, data: LessonCreate, db: AsyncSession = Depends(get_db)):
+async def create_lesson(
+    module_id: str,
+    data: LessonCreate,
+    db: AsyncSession = Depends(get_db),
+    admin: dict = Depends(get_current_admin),
+):
     m = await db.scalar(select(Module).where(Module.id == module_id))
     if not m:
         raise HTTPException(status_code=404, detail="Modül bulunamadı")
@@ -53,7 +59,10 @@ async def create_lesson(module_id: str, data: LessonCreate, db: AsyncSession = D
 
 @router.post("/modules/{module_id}/lessons/bulk", status_code=status.HTTP_201_CREATED)
 async def bulk_create_lessons(
-    module_id: str, data: LessonBulkCreate, db: AsyncSession = Depends(get_db)
+    module_id: str,
+    data: LessonBulkCreate,
+    db: AsyncSession = Depends(get_db),
+    admin: dict = Depends(get_current_admin),
 ):
     m = await db.scalar(select(Module).where(Module.id == module_id))
     if not m:
@@ -89,7 +98,12 @@ async def get_lesson(lesson_id: str, db: AsyncSession = Depends(get_db)):
 
 
 @router.put("/lessons/{lesson_id}", response_model=LessonResponse)
-async def update_lesson(lesson_id: str, data: LessonUpdate, db: AsyncSession = Depends(get_db)):
+async def update_lesson(
+    lesson_id: str,
+    data: LessonUpdate,
+    db: AsyncSession = Depends(get_db),
+    admin: dict = Depends(get_current_admin),
+):
     result = await db.execute(select(Lesson).where(Lesson.id == lesson_id))
     lesson = result.scalar_one_or_none()
     if not lesson:
@@ -101,7 +115,11 @@ async def update_lesson(lesson_id: str, data: LessonUpdate, db: AsyncSession = D
 
 
 @router.delete("/lessons/{lesson_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_lesson(lesson_id: str, db: AsyncSession = Depends(get_db)):
+async def delete_lesson(
+    lesson_id: str,
+    db: AsyncSession = Depends(get_db),
+    admin: dict = Depends(get_current_admin),
+):
     result = await db.execute(select(Lesson).where(Lesson.id == lesson_id))
     lesson = result.scalar_one_or_none()
     if not lesson:

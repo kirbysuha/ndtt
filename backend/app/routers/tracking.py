@@ -9,6 +9,7 @@ from app.models.note_tracking import NoteTracking, NoteStatus
 from app.schemas import (
     TrackingResponse, TrackingTableRow, StatusChangeRequest, StatusHistoryResponse
 )
+from app.routers.auth import get_current_admin
 from app.services.tracking_service import change_status, get_or_create_tracking
 from app.services.timer_service import (
     now_local,
@@ -127,7 +128,7 @@ async def get_recent_tracking(
 
     query = (
         select(Lesson)
-        .where(Lesson.lesson_date >= start_date)
+        .where(Lesson.lesson_date >= start_date, Lesson.lesson_date <= today)
         .options(selectinload(Lesson.note_tracking))
     )
     if module_id:
@@ -151,7 +152,10 @@ async def get_recent_tracking(
 
 @router.put("/tracking/{tracking_id}/status", response_model=TrackingTableRow)
 async def update_tracking_status(
-    tracking_id: str, data: StatusChangeRequest, db: AsyncSession = Depends(get_db),
+    tracking_id: str,
+    data: StatusChangeRequest,
+    db: AsyncSession = Depends(get_db),
+    admin: dict = Depends(get_current_admin),
 ):
     """Not durumunu güncelle. Apps Script'teki onEdit G sütunu işleminin karşılığı."""
     result = await db.execute(

@@ -1,17 +1,44 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { Sidebar } from "@/components/Sidebar";
 
 export function MainLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const isPublic = pathname?.startsWith("/apply");
+  const router = useRouter();
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+
+  const isPublic = pathname?.startsWith("/apply") || pathname === "/login";
+
+  useEffect(() => {
+    if (isPublic) {
+      setIsAuthenticated(true);
+      return;
+    }
+
+    const token = localStorage.getItem("ndtt_admin_token");
+    if (!token) {
+      setIsAuthenticated(false);
+      router.replace(`/login?from=${encodeURIComponent(pathname || "/")}`);
+    } else {
+      setIsAuthenticated(true);
+    }
+  }, [pathname, isPublic, router]);
 
   if (isPublic) {
     return (
       <main className="min-h-screen bg-slate-50 text-slate-900">
         {children}
       </main>
+    );
+  }
+
+  if (isAuthenticated === null || !isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+      </div>
     );
   }
 

@@ -13,6 +13,8 @@ import {
   Clock,
   Menu,
   X,
+  LogOut,
+  User,
 } from "lucide-react";
 
 const navItems = [
@@ -81,10 +83,29 @@ export function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="p-4 border-t border-slate-800">
-        <div className="flex items-center justify-between text-xs text-slate-400">
-          <span>Sürüm</span>
-          <span className="font-mono bg-slate-800 px-2 py-0.5 rounded text-slate-300">v1.2.0</span>
+      <div className="p-4 border-t border-slate-800 space-y-3">
+        <div className="flex items-center justify-between text-xs">
+          <div className="flex items-center gap-2 text-slate-300">
+            <div className="w-6 h-6 rounded-full bg-blue-600/30 text-blue-400 flex items-center justify-center">
+              <User className="w-3.5 h-3.5" />
+            </div>
+            <span className="font-medium">admin</span>
+          </div>
+          <button
+            onClick={() => {
+              localStorage.removeItem("ndtt_admin_token");
+              window.location.href = "/login";
+            }}
+            title="Çıkış Yap"
+            className="flex items-center gap-1 text-slate-400 hover:text-rose-400 text-xs py-1 px-2 rounded-md hover:bg-slate-800/80 transition-colors cursor-pointer"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span>Çıkış</span>
+          </button>
+        </div>
+        <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1">
+          <span>NDTT Panel</span>
+          <span className="font-mono bg-slate-800 px-1.5 py-0.5 rounded text-slate-400">v1.2.0</span>
         </div>
       </div>
     </div>

@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from app.database import get_db
+from app.routers.auth import get_current_admin
 from app.models.team import Team
 from app.schemas.team import TeamCreate, TeamUpdate, TeamResponse
 
@@ -16,7 +17,11 @@ async def list_teams(db: AsyncSession = Depends(get_db)):
 
 
 @router.post("", response_model=TeamResponse, status_code=status.HTTP_201_CREATED)
-async def create_team(data: TeamCreate, db: AsyncSession = Depends(get_db)):
+async def create_team(
+    data: TeamCreate,
+    db: AsyncSession = Depends(get_db),
+    admin: dict = Depends(get_current_admin),
+):
     # Aynı isimde ekip var mı kontrol et
     existing = await db.scalar(select(Team).where(Team.name == data.name))
     if existing:
@@ -42,7 +47,12 @@ async def get_team(team_id: str, db: AsyncSession = Depends(get_db)):
 
 
 @router.put("/{team_id}", response_model=TeamResponse)
-async def update_team(team_id: str, data: TeamUpdate, db: AsyncSession = Depends(get_db)):
+async def update_team(
+    team_id: str,
+    data: TeamUpdate,
+    db: AsyncSession = Depends(get_db),
+    admin: dict = Depends(get_current_admin),
+):
     team = await db.scalar(select(Team).where(Team.id == team_id))
     if not team:
         raise HTTPException(status_code=404, detail="Ekip bulunamadı")
@@ -53,7 +63,11 @@ async def update_team(team_id: str, data: TeamUpdate, db: AsyncSession = Depends
 
 
 @router.delete("/{team_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_team(team_id: str, db: AsyncSession = Depends(get_db)):
+async def delete_team(
+    team_id: str,
+    db: AsyncSession = Depends(get_db),
+    admin: dict = Depends(get_current_admin),
+):
     team = await db.scalar(select(Team).where(Team.id == team_id))
     if not team:
         raise HTTPException(status_code=404, detail="Ekip bulunamadı")
